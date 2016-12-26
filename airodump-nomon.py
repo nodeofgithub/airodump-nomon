@@ -22,6 +22,7 @@ if len(sys.argv) == 1:
 interface = sys.argv[1]
 ouifile = open("oui.txt","r").readlines()
 table = []
+stations = []
 tnum = 0
 if colors:
 	white = '\033[1;37;48m'
@@ -95,9 +96,10 @@ while True:
 	outlist = output.split('\n')
 	timestamp = int(time.time())
 	cont = True
+	stations = []
 	for line in outlist:
 		if interface in line:
-			bss = line.split()[1].split('(')[0]
+			bss = line.split()[1].split('(')[0].upper()
 			#DEBUG
 			print "PROCESSING " + bss
 			cont = True
@@ -170,6 +172,10 @@ while True:
 			elif len(devsplit) == 6:
 				dev = devsplit[3] + " " + devsplit[4] + " " + devsplit[5]
 			table[tnum-1][8] = dev
+		elif 'station count:' in line:
+			stasplit = line.split()
+			sta = int(stasplit[3])
+			stations.append([table[tnum-1][5], sta])
 
 	print "OUTPUTTING..."
 	tableprint = []
@@ -193,6 +199,8 @@ while True:
 	for line in tableprint:
 		print line 
 	print "Showing:" + str(len(tableprint)) + " Hidden:" + str((len(table) - len(tableprint))) + " Total:" + str(len(table)) + "\n"
+	for con in stations:
+		print white + str(con[1]) + " clients connected to " + con[0] + neutral
 	if logging:
 		print "LOGGING..."
 		logfile = open("airodump-nomon.csv", "wb")
