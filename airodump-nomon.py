@@ -33,6 +33,7 @@ if colors:
 	blue = '\033[1;34;48m'
 	purple = '\033[1;35;48m'
 	cyan = '\033[1;36;48m'
+	progressbar = '\033[1;33;43m'
 else:
 	white = ''
 	neutral = ''
@@ -62,7 +63,25 @@ def get_oui(mac):
 		macmanu = "Unknown"
 	return macmanu
 
-
+def printProgress (iteration, total, prefix = '', suffix = '', decimals = 1, barLength = 100):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        barLength   - Optional  : character length of bar (Int)
+    """
+    formatStr = "{0:." + str(decimals) + "f}"
+    percent = formatStr.format(100 * (iteration / float(total)))
+    filledLength = int(round(barLength * iteration / float(total)))
+    bar = (progressbar + '|' + neutral) * filledLength + '-' * (barLength - filledLength)
+    sys.stdout.write('\r%s |%s| %s%s %s' % (prefix, bar, percent, '%', suffix)),
+    if iteration == total:
+        sys.stdout.write('\n')
+    sys.stdout.flush()
 
 def signal_handler(signal,frame):
 	print('Exiting...')
@@ -92,16 +111,15 @@ while True:
 		output = "error"
 		if len(table) == 0:
 			sys.exit(0)
-	print "PROCESSING..."
 	outlist = output.split('\n')
 	timestamp = int(time.time())
 	cont = True
 	stations = []
-	for line in outlist:
+	printProgress(0, len(outlist), prefix = 'Progress:', suffix = 'Complete', barLength = 25)
+	for i,line in enumerate(outlist):
+		printProgress(i, len(outlist), prefix = 'PROCESSING:', suffix = 'COMPLETE', barLength = 25)
 		if interface in line:
 			bss = line.split()[1].split('(')[0].upper()
-			#DEBUG
-			print "PROCESSING " + bss
 			cont = True
 			for i, entry in enumerate(table):
 				if entry[0] == bss:
